@@ -9,6 +9,9 @@ huggingface-cli download openai-community/gpt2 --local-dir ../downloaded_plms/gp
 
 huggingface-cli download google-t5/t5-base --local-dir ../downloaded_plms/t5-lm/base
 
+huggingface-cli download meta-llama/Llama-3.2-3B --local-dir ../downloaded_plms/llama3/base
+
+huggingface-cli deepseek-ai/DeepSeek-R1-Distill-Llama-8B --local-dir ./downloaded_plms/deepseek/base
 
 ###################################################################################################
 
