@@ -20,16 +20,19 @@ from transformers import BertConfig, BertTokenizer, BertLMHeadModel,\
                          ElectraConfig, ElectraForMaskedLM, ElectraTokenizer, \
                          GPTJConfig, GPTJForCausalLM, \
                          LlamaConfig, LlamaTokenizer, LlamaModel, LlamaTokenizerFast, \
-                         MistralConfig
+                         MistralConfig, PreTrainedTokenizerFast , AutoTokenizer
 
 from plm_special.models.gpt2 import GPT2Model
 from plm_special.models.llama import LlamaModel
+from plm_special.models.llama3 import LlamaModel as Llama3_2Model
 from plm_special.models.mistral import MistralModel
 from plm_special.models.opt import OPTModel
 from plm_special.models.t5 import T5Model
 
                         
 ModelClass = namedtuple("ModelClass", ('config', 'tokenizer', 'model'))
+
+# The ** operator is used for unpacking a dictionary and passing it as keyword arguments to a function or class. In this case, it's unpacking the dictionary
 
 _MODEL_CLASSES = {
     'bert': ModelClass(**{
@@ -87,6 +90,11 @@ _MODEL_CLASSES = {
         "tokenizer": LlamaTokenizer,
         "model": LlamaModel,
     }),
+    "llama3": ModelClass(**{
+        "config": LlamaConfig,
+        "tokenizer": PreTrainedTokenizerFast,
+        "model": Llama3_2Model,
+    }),
     "mistral": ModelClass(**{
         "config": MistralConfig,
         "tokenizer": LlamaTokenizerFast,
@@ -120,6 +128,37 @@ def create_device_map_for_llama(device_input_side: str, device_output_side: str,
     device_map['norm'] = device_output_side
     return device_map
 
+import math
+
+def create_device_map_for_llama_3b(device_input_side: str, device_output_side: str, device_middle_side: str = None):
+    """
+    Create device map for Llama 3.2 (3B). The device map is used to evenly split the Llama model into two/three parts on multiple devices.
+    :param device_input_side: The device for the split of the model that receives the input (e.g., 'cuda:0').
+    :param device_output_side: The device for the split of the model that produces the output (e.g., 'cuda:1').
+    :param device_middle_side: The device for the split of the model that lies in the middle (e.g., 'cuda:2').
+    :return: A device map dictionary.
+    """
+    device_map = {
+        'embed_tokens': device_input_side  # Embedding layer on the input device
+    }
+
+    # Determine the device list based on whether a middle device is provided
+    if device_middle_side is None:
+        device_list = [device_input_side, device_output_side]
+    else:
+        device_list = [device_input_side, device_middle_side, device_output_side]
+
+    # Llama 3.2 (3B) has 28 transformer blocks
+    num_layers = 28
+    for i in range(num_layers):
+        # Distribute layers evenly across devices
+        device_map[f'layers.{i}'] = device_list[i // math.ceil(num_layers / len(device_list))]
+
+    # Final normalization layer on the output device
+    device_map['norm'] = device_output_side
+
+    return device_map
+
 
 def load_plm(model_name, model_path, specials_to_add = None, **kwargs):
     r"""A plm loader using a global config.
@@ -148,15 +187,26 @@ def load_plm(model_name, model_path, specials_to_add = None, **kwargs):
     # model = model_class.model.from_pretrained(model_path)
     device_input_side = kwargs.pop('device_input_side', None)
     device_output_side = kwargs.pop('device_output_side', None)
+    if 'llama3' in model_name:
+        print("-()*-()*"*10)
+        print("Llama3 model")
+        print("-()*-()*"*10)
+    
     if 'llama' in model_name and device_input_side is not None and device_output_side is not None:
         device_middle_side = kwargs.pop('device_middle_side', None)
-        device_map = create_device_map_for_llama(device_input_side, device_output_side, device_middle_side)
+        print("model_path",model_path)
+        if 'llama3' in model_name:
+            device_map = create_device_map_for_llama_3b(device_input_side, device_output_side, device_middle_side)
+        else:
+            device_map = create_device_map_for_llama(device_input_side, device_output_side, device_middle_side)
         model = model_class.model.from_pretrained(model_path, config=model_config, device_map=device_map)
     else:
         model = model_class.model.from_pretrained(model_path, config=model_config)
     
     tokenizer = model_class.tokenizer.from_pretrained(model_path) 
     print("If tokenizer is loaded: ",tokenizer.encode("hello world"),"\n")
+
+
 
     model, tokenizer = add_special_tokens(model, tokenizer, specials_to_add=specials_to_add)
     

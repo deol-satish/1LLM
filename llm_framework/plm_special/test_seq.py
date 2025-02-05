@@ -239,8 +239,8 @@ def testenvsim(args, model, exp_pool, target_return, loss_fn ,process_reward_fn=
     # print("*-*-"*80)
     # df.to_csv("first_save.csv")
 
-    max_ep_len = 600
-    llm_freq = 10
+    max_ep_len = 3600
+    llm_freq = 100
 
     row = df.iloc[0]
     test_start = time.time()
