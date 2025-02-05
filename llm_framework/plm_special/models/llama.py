@@ -179,7 +179,6 @@ class LlamaModel(LlamaPreTrainedModel):
         
         try:
             stop_layer_idx = self.layer_indices[stop_layer_idx]
-            print(f'Early stopping at layer {stop_layer_idx}.')
         except IndexError:
             raise IndexError('stop_layer_idx for early stopping should not exceed the number of layers in plm.')
 
@@ -226,7 +225,6 @@ class LlamaModel(LlamaPreTrainedModel):
                 all_self_attns += (layer_outputs[1],)
             
             if idx >= stop_layer_idx:
-                print(f'Early stopping at layer {idx}.')
                 break
 
         hidden_states = self.norm(hidden_states)
