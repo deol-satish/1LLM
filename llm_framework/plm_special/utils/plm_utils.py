@@ -22,6 +22,7 @@ from transformers import BertConfig, BertTokenizer, BertLMHeadModel,\
                          LlamaConfig, LlamaTokenizer, LlamaModel, LlamaTokenizerFast, \
                          MistralConfig, PreTrainedTokenizerFast , AutoTokenizer
 
+
 from plm_special.models.gpt2 import GPT2Model
 from plm_special.models.llama import LlamaModel
 from plm_special.models.llama3 import LlamaModel as Llama3_2Model
@@ -100,6 +101,11 @@ _MODEL_CLASSES = {
         "tokenizer": LlamaTokenizerFast,
         "model": MistralModel,
     }),
+    "deepseek": ModelClass(**{
+        "config": LlamaConfig,
+        "tokenizer": LlamaTokenizerFast,
+        "model": Llama3_2Model,
+    }),
 }
 
 
@@ -159,6 +165,35 @@ def create_device_map_for_llama_3b(device_input_side: str, device_output_side: s
 
     return device_map
 
+def create_device_map(device_input_side: str, device_output_side: str, device_middle_side: str = None, hidden_layers = 32):
+    """
+    Create device map for any model. The device map is used to evenly split the Llama model into two/three parts on multiple devices.
+    :param device_input_side: The device for the split of the model that receives the input (e.g., 'cuda:0').
+    :param device_output_side: The device for the split of the model that produces the output (e.g., 'cuda:1').
+    :param device_middle_side: The device for the split of the model that lies in the middle (e.g., 'cuda:2').
+    :return: A device map dictionary.
+    """
+    device_map = {
+        'embed_tokens': device_input_side  # Embedding layer on the input device
+    }
+
+    # Determine the device list based on whether a middle device is provided
+    if device_middle_side is None:
+        device_list = [device_input_side, device_output_side]
+    else:
+        device_list = [device_input_side, device_middle_side, device_output_side]
+
+    # DeepSeek R1 - Llama3 distrill) has 32 transformer blocks
+    num_layers = hidden_layers
+    for i in range(num_layers):
+        # Distribute layers evenly across devices
+        device_map[f'layers.{i}'] = device_list[i // math.ceil(num_layers / len(device_list))]
+
+    # Final normalization layer on the output device
+    device_map['norm'] = device_output_side
+
+    return device_map
+
 
 def load_plm(model_name, model_path, specials_to_add = None, **kwargs):
     r"""A plm loader using a global config.
@@ -179,6 +214,8 @@ def load_plm(model_name, model_path, specials_to_add = None, **kwargs):
         specials_to_add = ['<pad>']
     if 'llama' in model_name:
         specials_to_add = ['<pad>']
+    if 'deepseek' in model_name:
+        specials_to_add = ['<pad>']
     if 'bert' in model_name and 'roberta' not in model_name: # add is_decoder=True for BERT
         model_config.is_decoder = True
     if 'roberta' in model_name:  # add is_decoder=True for RoBERTa
@@ -191,6 +228,10 @@ def load_plm(model_name, model_path, specials_to_add = None, **kwargs):
         print("-()*-()*"*10)
         print("Llama3 model")
         print("-()*-()*"*10)
+    if 'deepseek' in model_name:
+        print("-()*-()*"*10)
+        print("deepseek model")
+        print("-()*-()*"*10)
     
     if 'llama' in model_name and device_input_side is not None and device_output_side is not None:
         device_middle_side = kwargs.pop('device_middle_side', None)
@@ -199,6 +240,17 @@ def load_plm(model_name, model_path, specials_to_add = None, **kwargs):
             device_map = create_device_map_for_llama_3b(device_input_side, device_output_side, device_middle_side)
         else:
             device_map = create_device_map_for_llama(device_input_side, device_output_side, device_middle_side)
+        model = model_class.model.from_pretrained(model_path, config=model_config, device_map=device_map)
+    else:
+        model = model_class.model.from_pretrained(model_path, config=model_config)
+    
+    if 'deepseek' in model_name and device_input_side is not None and device_output_side is not None:
+        device_middle_side = kwargs.pop('device_middle_side', None)
+        print("model_path",model_path)
+        print("Deepseek model Layers",model_config.num_hidden_layers)
+
+        device_map = create_device_map(device_input_side, device_output_side, device_middle_side,hidden_layers=model_config.num_hidden_layers)
+
         model = model_class.model.from_pretrained(model_path, config=model_config, device_map=device_map)
     else:
         model = model_class.model.from_pretrained(model_path, config=model_config)

@@ -134,7 +134,6 @@ class OfflineRLPolicy(nn.Module):
             inputs_embeds=stacked_inputs_ln,
             attention_mask=attention_mask,
             output_hidden_states=True,
-            stop_layer_idx=self.which_layer,
         )
         logits = transformer_outputs['last_hidden_state']
         if self.residual:
@@ -203,7 +202,6 @@ class OfflineRLPolicy(nn.Module):
             inputs_embeds=stacked_inputs_ln,
             attention_mask=attention_mask,
             output_hidden_states=True,
-            stop_layer_idx=self.which_layer,
         )
         logits = transformer_outputs['last_hidden_state']
         if self.residual:
