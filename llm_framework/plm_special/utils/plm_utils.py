@@ -112,59 +112,6 @@ _MODEL_CLASSES = {
 def get_model_class(plm_type: str):
     return _MODEL_CLASSES[plm_type]
 
-
-def create_device_map_for_llama(device_input_side: str, device_output_side: str, device_middle_side: str=None):
-    """
-    Create device map for llama. The device map is used to evenly split the llama model into two/three parts on two devices.
-    Currently only supoort llama-7b. We may consider to add support for more versions of llama.
-    :param device_input_side: The device for the split of model that receives the input (e.g., 'cuda:0').
-    :param device_output_side: The device for the split of model that produces the output (e.g., 'cuda:1'). 
-    :param device_input_side: The device for the split of model that lies in the middle (e.g., 'cuda:2').
-    :param device_map
-    """
-    device_map = {
-        'embed_tokens': device_input_side
-    }
-    if device_middle_side is None:
-        device_list = [device_input_side, device_output_side]
-    else:
-        device_list = [device_input_side, device_middle_side, device_output_side]
-    for i in range(32):  # llama-7b has 32 transformer blocks
-        device_map[f'layers.{i}'] = device_list[i // math.ceil(32 / len(device_list))]
-    device_map['norm'] = device_output_side
-    return device_map
-
-import math
-
-def create_device_map_for_llama_3b(device_input_side: str, device_output_side: str, device_middle_side: str = None):
-    """
-    Create device map for Llama 3.2 (3B). The device map is used to evenly split the Llama model into two/three parts on multiple devices.
-    :param device_input_side: The device for the split of the model that receives the input (e.g., 'cuda:0').
-    :param device_output_side: The device for the split of the model that produces the output (e.g., 'cuda:1').
-    :param device_middle_side: The device for the split of the model that lies in the middle (e.g., 'cuda:2').
-    :return: A device map dictionary.
-    """
-    device_map = {
-        'embed_tokens': device_input_side  # Embedding layer on the input device
-    }
-
-    # Determine the device list based on whether a middle device is provided
-    if device_middle_side is None:
-        device_list = [device_input_side, device_output_side]
-    else:
-        device_list = [device_input_side, device_middle_side, device_output_side]
-
-    # Llama 3.2 (3B) has 28 transformer blocks
-    num_layers = 28
-    for i in range(num_layers):
-        # Distribute layers evenly across devices
-        device_map[f'layers.{i}'] = device_list[i // math.ceil(num_layers / len(device_list))]
-
-    # Final normalization layer on the output device
-    device_map['norm'] = device_output_side
-
-    return device_map
-
 def create_device_map(device_input_side: str, device_output_side: str, device_middle_side: str = None, hidden_layers = 32):
     """
     Create device map for any model. The device map is used to evenly split the Llama model into two/three parts on multiple devices.
@@ -233,26 +180,13 @@ def load_plm(model_name, model_path, specials_to_add = None, **kwargs):
         print("deepseek model")
         print("-()*-()*"*10)
     
-    if 'llama' in model_name and device_input_side is not None and device_output_side is not None:
+    if ('llama' in model_name or 'deepseek' in model_name) and device_input_side is not None and device_output_side is not None:
+        print("Llama model Layers",model_config.num_hidden_layers)
         device_middle_side = kwargs.pop('device_middle_side', None)
-        print("model_path",model_path)
-        if 'llama3' in model_name:
-            device_map = create_device_map_for_llama_3b(device_input_side, device_output_side, device_middle_side)
-        else:
-            device_map = create_device_map_for_llama(device_input_side, device_output_side, device_middle_side)
-        model = model_class.model.from_pretrained(model_path, config=model_config, device_map=device_map)
-    else:
-        model = model_class.model.from_pretrained(model_path, config=model_config)
-    
-    if 'deepseek' in model_name and device_input_side is not None and device_output_side is not None:
-        device_middle_side = kwargs.pop('device_middle_side', None)
-        print("model_path",model_path)
-        print("Deepseek model Layers",model_config.num_hidden_layers)
-
         device_map = create_device_map(device_input_side, device_output_side, device_middle_side,hidden_layers=model_config.num_hidden_layers)
-
         model = model_class.model.from_pretrained(model_path, config=model_config, device_map=device_map)
     else:
+        print("device_map flase else")
         model = model_class.model.from_pretrained(model_path, config=model_config)
     
     tokenizer = model_class.tokenizer.from_pretrained(model_path) 
