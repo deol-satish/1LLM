@@ -9,7 +9,7 @@ class Config:
     exp_pools_dir = data_dir + 'exp_pools/'
 
     # plm special
-    plm_types = ['gpt2', 'llama', 'llava', 't5-lm', 'opt', 'mistral']
+    # plm_types = ['gpt2', 'llama', 'llava', 't5-lm', 'opt', 'mistral']
     plm_types = ['gpt2', 'llama', 'llava', 't5-lm', 'opt', 'mistral', 'llama3', 'deepseek']
     plm_sizes = ['xxs', 'xs', 'small', 'base', 'large', 'xl', 'xxl']  # note that the actual size of plm is dependent on the type of plm. 
                                                          # for example, for llama, 'base' is 7b, while for gpt2, 'base' is 340M. you can specify it yourself.
@@ -47,7 +47,7 @@ class Config:
         'llama3': {
             'base': 3072,
         },
-        'deepseekr1': {
+        'deepseek': {
             'base': 4096,
         },
     }
@@ -83,7 +83,7 @@ class Config:
         'llama3': {
             'base': 28,
         },
-        'deepseekr1': {
+        'deepseek': {
             'base': 32,
         },
     }
