@@ -10,7 +10,7 @@ TARGET_MODULES = {
     'llava': ["q_proj", "v_proj"],
     'mistral': ["q_proj", "v_proj"],
     'opt': ["q_proj", "v_proj"],
-    'gpt2': ["q_proj", "v_proj"],
+    'gpt2': ["c_attn", "c_proj"],  # Corrected for GPT-2
     't5-lm': ["q", "v"]
 }
 
