@@ -6,7 +6,8 @@ import psutil
 import GPUtil
 from munch import Munch
 from torch.utils.data import DataLoader
-
+import os
+from datetime import datetime
 from plm_special.utils.utils import process_batch
 
 
@@ -100,8 +101,18 @@ class Trainer:
         logs['training/train_loss_mean'] = np.mean(train_losses)
         logs['training/train_loss_std'] = np.std(train_losses)
         
+        # Get current date in YYYY-MM-DD format
+        current_date = datetime.now().strftime('%Y-%m-%d')
+
+        # Define your json_save_directory, including the current date as a subfolder
+        json_save_directory = f'./Logs/{self.args.plm_type}/{current_date}/{self.args.plm_type}_{self.args.plm_size}_train_logs_epoch_{epoch}.json'
+
+
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(json_save_directory), exist_ok=True)
+
         # Save custom logs to a JSON file for this epoch
-        with open(f'./Logs/custom_logs_epoch_train_{epoch}.json', 'w') as file:
+        with open(json_save_directory, 'w') as file:
             json.dump(custom_logs, file, indent=4)
 
         return logs, train_losses

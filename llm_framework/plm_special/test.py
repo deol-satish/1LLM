@@ -7,6 +7,9 @@ import GPUtil
 from munch import Munch
 from torch.utils.data import DataLoader
 
+import os
+from datetime import datetime
+
 from plm_special.utils.utils import process_batch
 
 
@@ -99,9 +102,19 @@ class Tester:
         logs['time/testing'] = time.time() - test_start
         logs['testing/test_loss_mean'] = np.mean(test_losses)
         logs['testing/test_loss_std'] = np.std(test_losses)
+
+        # Get current date in YYYY-MM-DD format
+        current_date = datetime.now().strftime('%Y-%m-%d')
+
+        # Define your json_save_directory, including the current date as a subfolder
+        json_save_directory = f'./Logs/{self.args.plm_type}/{current_date}/{self.args.plm_type}_{self.args.plm_size}_test_logs_epoch_{epoch}.json'
+
+
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(json_save_directory), exist_ok=True)
         
         # Save custom logs to a JSON file for this epoch
-        with open(f'./Logs/custom_logs_epoch_test_{epoch}.json', 'w') as file:
+        with open(json_save_directory, 'w') as file:
             json.dump(custom_logs, file, indent=4)
 
         return logs, test_losses
