@@ -14,7 +14,8 @@ from torch.optim.lr_scheduler import LambdaLR
 from config import cfg
 from plm_special.utils.constants import ACTION_LEVELS
 from plm_special.trainer import Trainer
-from plm_special.test_seq import testenvsim
+from plm_special.evaluate import evaluate_on_simulated_env
+from plm_special.test import Tester
 from plm_special.data.dataset import ExperienceDataset
 from plm_special.models.rl_policy import OfflineRLPolicy
 from plm_special.models.state_encoder import EncoderNetwork
@@ -167,16 +168,16 @@ def adapt(args, model, exp_dataset, exp_dataset_info, checkpoint_dir, best_model
 
     # exp_pool_path = "./data/exp_pools/exp_pool_l4s_eval.pkl"
     # exp_pool = pickle.load(open(exp_pool_path, 'rb'))
-    # testenvsim(args, model, exp_pool , target_return, loss_fn, eval_process_reward_fn)
+    # evaluate_on_simulated_env(args, model, exp_pool , target_return, loss_fn, eval_process_reward_fn)
 
 
-def test(args, model, exp_dataset_info, model_dir, result_dir, eval_process_reward_fn):
+def eval(args, model, exp_dataset_info, model_dir, result_dir, eval_process_reward_fn):
     exp_pool_path = "./data/exp_pools/exp_pool_l4s_eval.pkl"
     exp_pool = pickle.load(open(exp_pool_path, 'rb'))
     loss_fn = CrossEntropyLoss()
     model = load_model(args, model, model_dir)
     target_return = exp_dataset_info.max_return * args.target_return_scale
-    testenvsim(args, model, exp_pool , target_return, loss_fn, eval_process_reward_fn)
+    evaluate_on_simulated_env(args, model, exp_pool , target_return, loss_fn, eval_process_reward_fn)
     
     print('Load model from:', model_dir)
     print('Results saved at:', result_dir)
@@ -197,7 +198,7 @@ def run(args):
     if args.adapt:
         exp_pool_path = "./data/exp_pools/exp_pool_l4s_train.pkl"
 
-    if args.test:
+    if args.eval:
         exp_pool_path = "./data/exp_pools/exp_pool_l4s_eval.pkl"
 
 
@@ -268,7 +269,7 @@ def run(args):
         console_log = open(os.path.join(models_dir, f'early_stop_{args.which_layer}_console.log'), 'w')
         sys.stdout = ConsoleLogger(sys.__stdout__, console_log)
         adapt(args, rl_policy, exp_dataset, exp_dataset_info, checkpoint_dir, best_model_dir, process_reward)
-    if args.test:
+    if args.eval:
         if not os.path.exists(results_dir):
             os.makedirs(results_dir)
         model_dir = args.model_dir if args.model_dir is not None else best_model_dir
@@ -277,10 +278,7 @@ def run(args):
         print("model_dir:",model_dir)
         print("best_model_dir:",best_model_dir)
         print('Load model from:', model_dir)
-        model = load_model(args, rl_policy, model_dir)
-        target_return = exp_dataset_info.max_return * args.target_return_scale
-        loss_fn = CrossEntropyLoss()
-        test(args, rl_policy, exp_dataset_info, model_dir, results_dir, process_reward)
+        eval(args, rl_policy, exp_dataset_info, model_dir, results_dir, process_reward)
 
 
 if __name__ == '__main__':
@@ -313,6 +311,7 @@ if __name__ == '__main__':
     # other settings
     parser.add_argument('--adapt', action="store_true", help='adapt model')
     parser.add_argument('--test', action="store_true", help='test model')
+    parser.add_argument('--eval', action="store_true", help='evaluate model')
     parser.add_argument('--grad-accum-steps', dest='grad_accum_steps', type=int, default=32)
     parser.add_argument('--seed', help='random seed', type=int, default=100003)
     parser.add_argument('--scale', help='scale reward/return', type=int, default=1000)
@@ -333,6 +332,7 @@ if __name__ == '__main__':
     # args.eval_per_epoch = 1
     # args.adapt = True
     # args.test = True
+    # args.eval = True
     # args.device = 'cuda:0'
     # args.device_out = 'cuda:0'
     # args.which_layer = -1
@@ -340,7 +340,7 @@ if __name__ == '__main__':
     # >>> for debug <<<
 
     # command examples:
-    # python run_plm.py --adapt --test --grad-accum-steps 32 --seed 666 --plm-type llama --plm-size base --rank 128 --device cuda:0 --state-feature-dim 256 --w 20 --gamma 1. --lr 0.0001 --warmup-steps 2000 --num-epochs 80 --eval-per-epoch 2 --target-return-scale 1
+    # python run_plm.py --adapt --test --eval --grad-accum-steps 32 --seed 666 --plm-type llama --plm-size base --rank 128 --device cuda:0 --state-feature-dim 256 --w 20 --gamma 1. --lr 0.0001 --warmup-steps 2000 --num-epochs 80 --eval-per-epoch 2 --target-return-scale 1
     # >>> if you want to use your own experience pool, add arguments '--exp-pool-path your_exp_pool_path' <<<
     # >>> if you want to use your own trace dataset, add arguments '--trace your_trace --trace-num number_of_traces --fixed-order (if you want to iterate over all traces in a fixed sequential order)' <<<
     # >>> if you want to use your own video dataset, add arguments '--video your_video'<<<

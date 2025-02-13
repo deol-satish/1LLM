@@ -14,7 +14,7 @@ from torch.optim.lr_scheduler import LambdaLR
 from config import cfg
 from plm_special.utils.constants import ACTION_LEVELS
 from plm_special.trainer import Trainer
-from plm_special.test_seq import testenvsim
+from plm_special.eval import testenvsim
 from plm_special.data.dataset import ExperienceDataset
 from plm_special.models.rl_policy import OfflineRLPolicy
 from plm_special.models.state_encoder import EncoderNetwork

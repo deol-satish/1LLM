@@ -29,7 +29,7 @@ The repository is organized into various directories and files for efficient nav
   - **plm_utils.py**: Contains utilities for loading pre-trained LLMs.
   - **utils.py**: General-purpose utilities for data processing.
 - **trainer.py**: Handles the fine-tuning and training process of fine-tuning the LLMs.
-- **test_seq.py**: Contains scripts for evaluating sequence generation performance of adapted LLMs.
+- **evaluate.py**: Contains scripts for evaluating sequence generation performance of adapted LLMs.
 - **test.py**: Includes scripts for evaluating the overall performance of the adapted LLMs.
 
 ### `run_plm.py`
