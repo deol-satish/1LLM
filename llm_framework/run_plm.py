@@ -128,7 +128,6 @@ def adapt(args, model, exp_dataset, exp_dataset_info, checkpoint_dir, best_model
                       grad_accum_steps=args.grad_accum_steps)
 
     target_return = exp_dataset_info.max_return * args.target_return_scale
-    best_eval_return = 0.
 
     total_train_losses = []
     min_loss=np.inf
@@ -180,9 +179,38 @@ def eval(args, model, exp_dataset_info, model_dir, result_dir, eval_process_rewa
     evaluate_on_simulated_env(args, model, exp_pool , target_return, loss_fn, eval_process_reward_fn)
     
     print('Load model from:', model_dir)
-    print('Results saved at:', result_dir)
 
+def test(args, rl_policy, exp_dataset_info, model_dir, result_dir, eval_process_reward_fn):
+    exp_pool_path = "./data/exp_pools/exp_pool_l4s_train.pkl"
+    exp_pool = pickle.load(open(exp_pool_path, 'rb'))
+    exp_dataset = ExperienceDataset(exp_pool, gamma=args.gamma, scale=args.scale, max_length=args.w, sample_step=args.sample_step)
+    exp_dataset_info = Munch(exp_dataset.exp_dataset_info)
+    loss_fn = CrossEntropyLoss()
+    print("model_dir",model_dir)
+    model = load_model(args, rl_policy, model_dir)
+    target_return = exp_dataset_info.max_return * args.target_return_scale
+    optimizer = AdamW(
+        model.parameters(),
+        lr=args.lr,
+        weight_decay=args.weight_decay,
+    )
+    lr_scheduler = LambdaLR(
+        optimizer,
+        lambda steps: min((steps + 1) / args.warmup_steps, 1)
+    )
+    loss_fn = CrossEntropyLoss()
+    tester = Tester(args, model=model, optimizer=optimizer, exp_dataset=exp_dataset, loss_fn=loss_fn, device=args.device, lr_scheduler=lr_scheduler, 
+                      grad_accum_steps=args.grad_accum_steps)
+    
+    total_train_losses = []
 
+    for epoch in range(args.num_epochs):
+        test_logs, train_losses = tester.test_epoch(epoch)
+        total_train_losses.extend(train_losses)
+        print('='* 20, f'Testing Iteration #{epoch}', '=' * 20)
+        print('>' * 10, 'Testing Information:')
+        pprint(test_logs)    
+    print('Load model from:', model_dir)
 
 def run(args):
     assert args.plm_type in cfg.plm_types
@@ -200,6 +228,9 @@ def run(args):
 
     if args.eval:
         exp_pool_path = "./data/exp_pools/exp_pool_l4s_eval.pkl"
+
+    if args.test:
+        exp_pool_path = "./data/exp_pools/exp_pool_l4s_train.pkl"
 
 
     # 3. create training dataset, fetch info
@@ -279,6 +310,19 @@ def run(args):
         print("best_model_dir:",best_model_dir)
         print('Load model from:', model_dir)
         eval(args, rl_policy, exp_dataset_info, model_dir, results_dir, process_reward)
+    if args.test:
+        if not os.path.exists(results_dir):
+            os.makedirs(results_dir)
+        model_dir = args.model_dir if args.model_dir is not None else best_model_dir
+        assert os.path.exists(model_dir), f'Model weight dir {model_dir} does not exist.'
+        print("-------------------------------------------------------")
+        print("model_dir:",model_dir)
+        print("best_model_dir:",best_model_dir)
+        print('Load model from:', model_dir)
+        model = load_model(args, rl_policy, model_dir)
+        target_return = exp_dataset_info.max_return * args.target_return_scale
+        loss_fn = CrossEntropyLoss()
+        test(args, rl_policy, exp_dataset_info, model_dir, results_dir, process_reward)
 
 
 if __name__ == '__main__':
