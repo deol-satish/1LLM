@@ -74,7 +74,7 @@ def convert_exp_pool_to_dataframe(exp_pool, csv_output_path='exp_pool_data.csv',
     df['dones'] = exp_pool.dones
 
     # Step 2: Save the DataFrame to a CSV file
-    df.to_csv(csv_output_path, index=False)
+    # df.to_csv(csv_output_path, index=False)
     print(f"DataFrame saved successfully to: {csv_output_path}")
     return df
 
@@ -252,8 +252,8 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,pro
 
     state_columns = [f'state_{i}' for i in range(len(exp_pool.states[0]))]
     # Open the file in write mode to truncate it
-    with open('output_log.txt', 'w') as file:
-        pass  # No need to write anything, just truncating the file
+    # with open('output_log.txt', 'w') as file:
+    #     pass  # No need to write anything, just truncating the file
 
 
     for ep_index in range(max_ep_len):
