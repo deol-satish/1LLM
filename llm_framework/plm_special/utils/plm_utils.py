@@ -23,13 +23,21 @@ from transformers import BertConfig, BertTokenizer, BertLMHeadModel,\
                          MistralConfig, PreTrainedTokenizerFast , AutoTokenizer
 
 
-from plm_special.models.gpt2 import GPT2Model
-from plm_special.models.llama import LlamaModel
-from plm_special.models.llama3 import LlamaModel as Llama3_2Model
-from plm_special.models.mistral import MistralModel
-from plm_special.models.opt import OPTModel
-from plm_special.models.t5 import T5Model
+# from plm_special.models.gpt2 import GPT2Model
+# from plm_special.models.llama import LlamaModel
+# from plm_special.models.llama3 import LlamaModel as Llama3_2Model
+# from plm_special.models.mistral import MistralModel
+# from plm_special.models.opt import OPTModel
+# from plm_special.models.t5 import T5Model
 
+
+from transformers.models.gpt2.modeling_gpt2 import GPT2Model
+from transformers.models.t5.modeling_t5 import T5Model
+from transformers.models.llama.modeling_llama import LlamaModel
+from transformers.models.opt.modeling_opt import OPTModel
+from transformers.models.mistral.modeling_mistral import MistralModel
+
+from plm_special.models.llm_models.t5 import T5Model
                         
 ModelClass = namedtuple("ModelClass", ('config', 'tokenizer', 'model'))
 
@@ -94,7 +102,7 @@ _MODEL_CLASSES = {
     "llama3": ModelClass(**{
         "config": LlamaConfig,
         "tokenizer": PreTrainedTokenizerFast,
-        "model": Llama3_2Model,
+        "model": LlamaModel,
     }),
     "mistral": ModelClass(**{
         "config": MistralConfig,
@@ -104,7 +112,7 @@ _MODEL_CLASSES = {
     "deepseek": ModelClass(**{
         "config": LlamaConfig,
         "tokenizer": LlamaTokenizerFast,
-        "model": Llama3_2Model,
+        "model": LlamaModel,
     }),
 }
 
