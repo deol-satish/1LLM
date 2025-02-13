@@ -94,7 +94,7 @@ _MODEL_CLASSES = {
         "tokenizer": GPT2Tokenizer, 
         "model": GPTJForCausalLM,
     }),
-    "llama": ModelClass(**{
+    "llama2": ModelClass(**{
         "config": LlamaConfig,
         "tokenizer": LlamaTokenizer,
         "model": LlamaModel,

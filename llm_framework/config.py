@@ -10,7 +10,7 @@ class Config:
 
     # plm special
     # plm_types = ['gpt2', 'llama', 'llava', 't5-lm', 'opt', 'mistral']
-    plm_types = ['gpt2', 'llama', 'llava', 't5-lm', 'opt', 'mistral', 'llama3', 'deepseek']
+    plm_types = ['gpt2', 'llama2', 'llava', 't5-lm', 'opt', 'mistral', 'llama3', 'deepseek']
     plm_sizes = ['xxs', 'xs', 'small', 'base', 'large', 'xl', 'xxl']  # note that the actual size of plm is dependent on the type of plm. 
                                                          # for example, for llama, 'base' is 7b, while for gpt2, 'base' is 340M. you can specify it yourself.
     plm_dir = _base_dir + ('../../downloaded_plms' if 'llm_framework' in _base_dir else '../downloaded_plms')
@@ -22,7 +22,7 @@ class Config:
             'large': 1280,
             'xl': 1600,
         },
-        'llama': {
+        'llama2': {
             'base': 4096,
         },
         't5-lm': {
@@ -58,7 +58,7 @@ class Config:
             'large': 36,
             'xl': 48
         },
-        'llama': {
+        'llama2': {
             'base': 32,
         },
         't5-lm': { 

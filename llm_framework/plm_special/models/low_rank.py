@@ -4,7 +4,7 @@ from peft import LoraConfig, get_peft_model, TaskType, get_peft_model_state_dict
 
 
 TARGET_MODULES = {
-    'llama': ["q_proj", "v_proj"],
+    'llama2': ["q_proj", "v_proj"],
     'llama3': ["q_proj", "v_proj"],
     'deepseek': ["q_proj", "v_proj"],
     'llava': ["q_proj", "v_proj"],
