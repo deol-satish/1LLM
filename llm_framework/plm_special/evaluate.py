@@ -8,6 +8,9 @@ from munch import Munch
 from torch.utils.data import DataLoader
 import pandas as pd
 
+import os
+from datetime import datetime
+
 from plm_special.utils.utils import process_batch
 from plm_special.data.dataset import ExperienceDataset
 import random
@@ -239,7 +242,7 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,pro
     # print("*-*-"*80)
     # df.to_csv("first_save.csv")
 
-    max_ep_len = 3600
+    max_ep_len = 200
     llm_freq = 100
 
     row = df.iloc[0]
@@ -350,10 +353,20 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,pro
             'labels': tensor_to_list(labels)
         }
         custom_logs['steps'].append(step_logs)
-        
+    
+
+    # Get current date in YYYY-MM-DD format
+    current_date = datetime.now().strftime('%Y-%m-%d')
+    # Define your json_save_directory, including the current date as a subfolder
+    json_save_directory = f'./Logs/{args.plm_type}/{current_date}/{args.plm_type}_{args.plm_size}_eval_logs_llm.json'
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(json_save_directory), exist_ok=True)
+
     # Save custom logs to a JSON file for this epoch
-    with open(f'./Logs/eval_logs_llm.json', 'w') as file:
+    with open(json_save_directory, 'w') as file:
         json.dump(custom_logs, file, indent=4)
+
+
     start_iloc = 0
     custom_logs = {'steps': []}
  # To Save Original Sequence
@@ -390,8 +403,16 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,pro
         }
         start_iloc+=1
         custom_logs['steps'].append(step_logs)
+    
+    # Get current date in YYYY-MM-DD format
+    current_date = datetime.now().strftime('%Y-%m-%d')
+    # Define your json_save_directory, including the current date as a subfolder
+    json_save_directory = f'./Logs/{args.plm_type}/{current_date}/{args.plm_type}_{args.plm_size}_eval_logs_original.json'
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(json_save_directory), exist_ok=True)
+
     # Save custom logs to a JSON file for this epoch
-    with open(f'./Logs/eval_logs_original.json', 'w') as file:
+    with open(json_save_directory, 'w') as file:
         json.dump(custom_logs, file, indent=4)
 
 
