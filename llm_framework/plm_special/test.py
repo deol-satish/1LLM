@@ -107,7 +107,7 @@ class Tester:
         current_date = datetime.now().strftime('%Y-%m-%d')
 
         # Define your json_save_directory, including the current date as a subfolder
-        json_save_directory = f'./Logs/{self.args.plm_type}/{current_date}/{self.args.plm_type}_{self.args.plm_size}_test_logs_epoch_{epoch}.json'
+        json_save_directory = f'./results/{self.args.plm_type}/{current_date}/{self.args.plm_type}_{self.args.plm_size}_test_logs_epoch_{epoch}.json'
 
 
         # Ensure the directory exists

@@ -358,7 +358,7 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,pro
     # Get current date in YYYY-MM-DD format
     current_date = datetime.now().strftime('%Y-%m-%d')
     # Define your json_save_directory, including the current date as a subfolder
-    json_save_directory = f'./Logs/{args.plm_type}/{current_date}/{args.plm_type}_{args.plm_size}_eval_logs_llm.json'
+    json_save_directory = f'./results/{args.plm_type}/{current_date}/{args.plm_type}_{args.plm_size}_eval_logs_llm.json'
     # Ensure the directory exists
     os.makedirs(os.path.dirname(json_save_directory), exist_ok=True)
 
@@ -407,7 +407,7 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,pro
     # Get current date in YYYY-MM-DD format
     current_date = datetime.now().strftime('%Y-%m-%d')
     # Define your json_save_directory, including the current date as a subfolder
-    json_save_directory = f'./Logs/{args.plm_type}/{current_date}/{args.plm_type}_{args.plm_size}_eval_logs_original.json'
+    json_save_directory = f'./results/{args.plm_type}/{current_date}/{args.plm_type}_{args.plm_size}_eval_logs_original.json'
     # Ensure the directory exists
     os.makedirs(os.path.dirname(json_save_directory), exist_ok=True)
 
