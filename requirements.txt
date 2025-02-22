@@ -1,0 +1,10 @@
+torch==2.6.0+cu126
+torchvision==0.21.0+cu126
+torchaudio==2.6.0+cu126
+huggingface_hub==0.28.0
+munch==4.0.0
+GPUtil==1.4.0
+peft==0.14.0
+yacs==0.1.8
+sentencepiece==0.2.0
+protobuf==5.29.3
