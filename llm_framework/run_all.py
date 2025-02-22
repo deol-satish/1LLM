@@ -1,13 +1,26 @@
 import subprocess
 
-# Define the commands
-commands = [
-    "python run_plm.py --adapt --grad-accum-steps 32 --plm-type llama3 --plm-size base --rank 128 --device cuda:0 --lr 0.0001 --warmup-steps 2000 --num-epochs 200 --eval-per-epoch 2",
-    "python run_plm.py --adapt --grad-accum-steps 32 --plm-type opt --plm-size xs --rank 128 --device cuda:0 --lr 0.0001 --warmup-steps 2000 --num-epochs 200 --eval-per-epoch 2",
-    "python run_plm.py --adapt --grad-accum-steps 32 --plm-type t5-lm --plm-size base --rank 128 --device cuda:0 --lr 0.0001 --warmup-steps 2000 --num-epochs 200 --eval-per-epoch 2",
-    "python run_plm.py --adapt --grad-accum-steps 32 --plm-type gpt2 --plm-size small --rank 128 --device cuda:0 --lr 0.0001 --warmup-steps 2000 --num-epochs 200 --eval-per-epoch 2",
-    "python run_plm.py --adapt --grad-accum-steps 32 --plm-type llama2 --plm-size base --rank 128 --device cuda:0 --lr 0.0001 --warmup-steps 2000 --num-epochs 200 --eval-per-epoch 2"
+# Function to generate commands for different models and configurations
+def generate_command(plm_type, plm_size, mode='adapt', device='cuda:0', grad_accum_steps=32, 
+                     lr=0.0001, warmup_steps=2000, num_epochs=200, eval_per_epoch=2, rank=128):
+    return f"python run_plm.py --{mode} --grad-accum-steps {grad_accum_steps} --plm-type {plm_type} --plm-size {plm_size} --rank {rank} --device {device} --lr {lr} --warmup-steps {warmup_steps} --num-epochs {num_epochs} --eval-per-epoch {eval_per_epoch}"
+
+# List of PLM types and sizes
+plm_configurations = [
+    ("llama3", "base"),
+    ("opt", "xs"),
+    ("t5", "base"),
+    ("gpt2", "small"),
+    ("llama2", "base"),
 ]
+
+# Modes for each experiment
+modes = ['adapt', 'test', 'eval']
+
+# Generate all commands dynamically
+commands = [generate_command(plm_type, plm_size, mode) 
+            for plm_type, plm_size in plm_configurations 
+            for mode in modes]
 
 # Run each command in sequence
 for command in commands:
