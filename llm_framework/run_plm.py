@@ -58,7 +58,7 @@ PLM_LAYER_SIZES = {
     'llama': {
         'base': 32,
     },
-    't5-lm': { 
+    't5': { 
         'base': 12,
         'small': 6,
         'large': 24,

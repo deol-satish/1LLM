@@ -74,7 +74,7 @@ _MODEL_CLASSES = {
         'tokenizer': T5Tokenizer,
         'model': T5ForConditionalGeneration,
     }),
-    't5-lm':ModelClass(**{
+    't5':ModelClass(**{
         'config': T5Config,
         'tokenizer': T5Tokenizer,
         'model': T5Model,

@@ -11,7 +11,7 @@ TARGET_MODULES = {
     'mistral': ["q_proj", "v_proj"],
     'opt': ["q_proj", "v_proj"],
     'gpt2': ["c_attn", "c_proj"],  # Corrected for GPT-2
-    't5-lm': ["q", "v"]
+    't5': ["q", "v"]
 }
 
 

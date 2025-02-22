@@ -83,7 +83,7 @@ huggingface-cli download openai-community/gpt2 --local-dir ../downloaded_plms/gp
 
 
 
-huggingface-cli download google-t5/t5-base --local-dir ../downloaded_plms/t5-lm/base
+huggingface-cli download google-t5/t5-base --local-dir ../downloaded_plms/t5/base
 
 
 conda activate llmenv;cd C:\Users\User\Documents\GitHub\L4S-LLM
@@ -109,8 +109,8 @@ python run_plm.py --adapt --grad-accum-steps 32 --plm-type llava --plm-size base
 # To tun Mistral
 python run_plm.py --adapt --grad-accum-steps 32 --plm-type mistral --plm-size base --rank -1 --device cuda:0 --lr 0.0001 --warmup-steps 2000 --num-epochs 80 --eval-per-epoch 2
 
-#To tun t5-lm
-python run_plm.py --adapt --grad-accum-steps 32 --plm-type t5-lm --plm-size base --rank -1 --device cuda:0 --lr 0.0001 --warmup-steps 2000 --num-epochs 80 --eval-per-epoch 2
+#To tun t5
+python run_plm.py --adapt --grad-accum-steps 32 --plm-type t5 --plm-size base --rank -1 --device cuda:0 --lr 0.0001 --warmup-steps 2000 --num-epochs 80 --eval-per-epoch 2
 
 
 
