@@ -1,7 +1,8 @@
+# I used python 3.12.8
+
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
 
 conda install -c conda-forge huggingface_hub
-
 
 pip install munch
 pip install GPUtil
@@ -9,4 +10,3 @@ pip install peft
 pip install yacs
 pip install sentencepiece
 pip install protobuf
-
