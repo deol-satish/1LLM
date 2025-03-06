@@ -220,6 +220,8 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,pro
     custom_logs = {'steps': []}
 
     df =  convert_exp_pool_to_dataframe(exp_pool)
+    # For Classic Traffic
+    df = df[df['state_0'] == 0]
     # print(df.columns)
     # print(df.shape)
     # print(df.describe())
@@ -241,6 +243,9 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,pro
     # Open the file in write mode to truncate it
     # with open('output_log.txt', 'w') as file:
     #     pass  # No need to write anything, just truncating the file
+
+
+    
 
 
     for ep_index in range(max_ep_len):
@@ -345,7 +350,7 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,pro
     # Get current date in YYYY-MM-DD format
     current_date = datetime.now().strftime('%Y-%m-%d')
     # Define your json_save_directory, including the current date as a subfolder
-    json_save_directory = f'./results/{args.plm_type}/{current_date}/{args.plm_type}_{args.plm_size}_eval_logs_llm.json'
+    json_save_directory = f'./results/{args.plm_type}/{current_date}/{args.plm_type}_{args.plm_size}_eval_logs_llm_classic.json'
     # Ensure the directory exists
     os.makedirs(os.path.dirname(json_save_directory), exist_ok=True)
 
@@ -394,7 +399,199 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,pro
     # Get current date in YYYY-MM-DD format
     current_date = datetime.now().strftime('%Y-%m-%d')
     # Define your json_save_directory, including the current date as a subfolder
-    json_save_directory = f'./results/{args.plm_type}/{current_date}/{args.plm_type}_{args.plm_size}_eval_logs_original.json'
+    json_save_directory = f'./results/{args.plm_type}/{current_date}/{args.plm_type}_{args.plm_size}_eval_logs_original_classic.json'
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(json_save_directory), exist_ok=True)
+
+    # Save custom logs to a JSON file for this epoch
+    with open(json_save_directory, 'w') as file:
+        json.dump(custom_logs, file, indent=4)
+
+
+
+
+    
+    df =  convert_exp_pool_to_dataframe(exp_pool)
+    # For L4S Traffic
+    df = df[df['state_0'] == 1]
+    # print(df.columns)
+    # print(df.shape)
+    # print(df.describe())
+    # print(df.head(5))
+    # print("**"*10)
+    # print(df.tail(5))
+    # print("*-*-"*80)
+    # df.to_csv("first_save.csv")
+
+    max_ep_len = 200
+    llm_freq = 100
+
+    row = df.iloc[0]
+    test_start = time.time()
+    cur_datapoint_idx = 0
+    start_iloc = 0
+
+    state_columns = [f'state_{i}' for i in range(len(exp_pool.states[0]))]
+    # Open the file in write mode to truncate it
+    # with open('output_log.txt', 'w') as file:
+    #     pass  # No need to write anything, just truncating the file
+
+    
+    
+
+
+    for ep_index in range(max_ep_len):
+        # df.to_csv("second_save.csv")
+        row = df.iloc[start_iloc]
+        # print("row,",row)
+        
+        # print("--" * 40)
+        state = np.array(row[state_columns], dtype=np.float32)
+        current_action = row['actions']
+        reward=row['rewards']
+        done=0
+        batch = [state],[current_action],[reward],[done]
+        # print("batch",batch)
+        test_loss, states, actions, returns, timesteps, labels, actions_pred1, actions_pred = otest_step(args, model, loss_fn, batch,target_return)
+
+        # print("actions_pred",actions_pred)
+        # print("actions_pred.shape",actions_pred.shape)
+
+        new_action = actions_pred.detach().cpu().numpy().argmax(axis=1).flatten()
+        
+        # print("new_action",new_action)
+        # print("type(new_action)",type(new_action))
+
+        # print("new_action",new_action.astype(int))
+        # print("type(new_action)",type(new_action.astype(int)))
+
+
+        # print("new_action",new_action.item())
+        # print("type(new_action)",type(new_action.item()))
+
+        df_qt= df[df['state_0']== int(states[0][0][col_dict['queue_type']])]
+
+
+        
+        df_ats= df_qt[df_qt['actions']== int(new_action.item())]
+        # print("df_ats.head(3)")
+        # print(df_ats.head(3))
+        # print(df_ats.describe())
+
+        # print(df_ats.head())
+        # print("*"*10)
+        # print(df_qt.head())
+
+        if df_ats.empty:
+            # Save this message to a separate text file
+            # print("new_action",new_action.item())
+            # print("queue_type",states[0][0][0])
+            # with open("output_log.txt", "a") as file:
+            #     file.write(str(ep_index))
+            #     file.write(" : df_ats is empty, skipping this batch.\n")                
+            #     file.write("df_qt empty?:")
+            #     file.write(str(df_qt.empty))
+            #     file.write("\n")
+            #     file.write("new_action?:")
+            #     file.write(str(new_action.item()))
+            #     file.write("\n")
+            #     file.write("queue_type?:")
+            #     file.write(str(int(states[0][0][col_dict['queue_type']])))
+            #     file.write("\n")
+            #     file.write("-:"*10)
+            #     file.write("\n")
+
+            continue  # Skip to the next iteration of the loop
+        # print("current_queue_delay",states[0][0][col_dict['current_queue_delay']])
+        # print("length_in_bytes",states[0][0][col_dict['length_in_bytes']])
+        # print("packet_length",states[0][0][col_dict['packet_length']])
+        # print("types(states)",type(states))
+        new_queue_length = float(states[0][0][col_dict['length_in_bytes']])
+        # print("new_action",new_action.item())
+        if new_action == 0 or new_action == 2:
+            new_queue_length = (float(states[0][0][col_dict['length_in_bytes']]) + float(states[0][0][col_dict['packet_length']]))
+        cur_datapoint_idx = find_nearest_length(df_ats, new_queue_length)
+        # print("datapoint",cur_datapoint_idx)
+        if ep_index % llm_freq == 0:
+            start_iloc = cur_datapoint_idx
+            model.reset_dq()
+        else:
+            start_iloc+=1
+
+        # Next start datapoint of episode will be the nearest datapoint,
+        # we can find from the database
+
+        # print(f'Step {ep_index} - test_loss.item() {test_loss.item()}')
+        
+        # Log step information
+        step_logs = {
+            'step': ep_index,
+            'test_loss': test_loss.item(),
+            'actions_pred1': tensor_to_list(actions_pred1),
+            'actions_pred': tensor_to_list(actions_pred),
+            'states': tensor_to_list(states),
+            'actions': tensor_to_list(actions),
+            'returns': tensor_to_list(returns),
+            'timestamps': str(time.time()),
+            'timesteps': tensor_to_list(timesteps),
+            'labels': tensor_to_list(labels)
+        }
+        custom_logs['steps'].append(step_logs)
+    
+
+    # Get current date in YYYY-MM-DD format
+    current_date = datetime.now().strftime('%Y-%m-%d')
+    # Define your json_save_directory, including the current date as a subfolder
+    json_save_directory = f'./results/{args.plm_type}/{current_date}/{args.plm_type}_{args.plm_size}_eval_logs_llm_l4s.json'
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(json_save_directory), exist_ok=True)
+
+    # Save custom logs to a JSON file for this epoch
+    with open(json_save_directory, 'w') as file:
+        json.dump(custom_logs, file, indent=4)
+
+
+    start_iloc = 0
+    custom_logs = {'steps': []}
+ # To Save Original Sequence
+    for ep_index in range(max_ep_len):
+        # df.to_csv("second_save.csv")
+        # print("start_iloc",start_iloc)
+        row = df.iloc[start_iloc]
+        # print("row,",row)
+        
+        # print("--" * 40)
+        state = np.array(row[state_columns], dtype=np.float32)
+        current_action = row['actions']
+        reward=row['rewards']
+        done=0
+        batch = [state],[current_action],[reward],[done]
+        # print("batch",batch)
+        test_loss, states, actions, returns, timesteps, labels, actions_pred1, actions_pred = otest_step(args, model, loss_fn, batch,target_return)
+
+
+        # print(f'Step {ep_index} - test_loss.item() {test_loss.item()}')
+        
+        # Log step information
+        step_logs = {
+            'step': ep_index,
+            'test_loss': test_loss.item(),
+            'actions_pred1': tensor_to_list(actions_pred1),
+            'actions_pred': tensor_to_list(actions_pred),
+            'states': tensor_to_list(states),
+            'actions': tensor_to_list(actions),
+            'returns': tensor_to_list(returns),
+            'timestamps': str(time.time()),
+            'timesteps': tensor_to_list(timesteps),
+            'labels': tensor_to_list(labels)
+        }
+        start_iloc+=1
+        custom_logs['steps'].append(step_logs)
+    
+    # Get current date in YYYY-MM-DD format
+    current_date = datetime.now().strftime('%Y-%m-%d')
+    # Define your json_save_directory, including the current date as a subfolder
+    json_save_directory = f'./results/{args.plm_type}/{current_date}/{args.plm_type}_{args.plm_size}_eval_logs_original_l4s.json'
     # Ensure the directory exists
     os.makedirs(os.path.dirname(json_save_directory), exist_ok=True)
 
