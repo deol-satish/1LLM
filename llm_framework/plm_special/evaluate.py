@@ -68,15 +68,15 @@ def convert_exp_pool_to_dataframe(exp_pool, csv_output_path='exp_pool_data.csv',
 
 
 def find_nearest_length(df, user_input):
-    print("||||||||||||||||"*40)
-    print("df in function find_nearest_length")
+    # print("||||||||||||||||"*40)
+    # print("df in function find_nearest_length")
     if df.empty:
         # Handle the empty DataFrame case
         print("DataFrame is empty, returning None.")
         return None  # Return None or another suitable default value
 
     # Calculate the absolute difference with user input
-    print("user_input",user_input)
+    # print("user_input",user_input)
     # nearest_idx = (df['state_6'] - user_input).abs().idxmin()
     
     # df_sort = df.iloc[(df['state_6']-user_input).abs().argsort()[:1]]
@@ -86,7 +86,7 @@ def find_nearest_length(df, user_input):
 
 
     nearest_idx = (df['state_6'] - user_input).abs().idxmin()
-    print("22nearest_idx",nearest_idx)
+    # print("22nearest_idx",nearest_idx)
 
     
 
@@ -97,7 +97,7 @@ def find_nearest_length(df, user_input):
         print("No valid index found, returning None.")
         return None  # Return None or another suitable default value
     
-    print("||||||||||||||||"*40)
+    # print("||||||||||||||||"*40)
 
     return nearest_idx
 
@@ -149,10 +149,10 @@ def test_step(args, model, loss_fn, raw_batch, target_return):
         actions_pred = actions_pred1.permute(0, 2, 1)
         loss = loss_fn(actions_pred, labels)
 
-        print("actions_pred1",actions_pred1)
-        print("actions_pred",actions_pred)
-        print("llm-queue_action",queue_action)
-        print("actual-queue_action",labels)
+        # print("actions_pred1",actions_pred1)
+        # print("actions_pred",actions_pred)
+        # print("llm-queue_action",queue_action)
+        # print("actual-queue_action",labels)
 
         return loss, states, actions, returns, timesteps, labels, actions_pred1, actions_pred
 
@@ -202,9 +202,9 @@ def otest_step(args, model, loss_fn, raw_batch, target_return):
 
         queue_action = 0
 
-        print("actions_pred1",actions_pred1)
-        print("actions_pred",actions_pred)
-        print("actual-queue_action",labels)
+        # print("actions_pred1",actions_pred1)
+        # print("actions_pred",actions_pred)
+        # print("actual-queue_action",labels)
 
         return loss, states, actions, returns, timesteps, labels, actions_pred1, actions_pred
 
@@ -246,9 +246,9 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,pro
     for ep_index in range(max_ep_len):
         # df.to_csv("second_save.csv")
         row = df.iloc[start_iloc]
-        print("row,",row)
+        # print("row,",row)
         
-        print("--" * 40)
+        # print("--" * 40)
         state = np.array(row[state_columns], dtype=np.float32)
         current_action = row['actions']
         reward=row['rewards']
@@ -310,11 +310,11 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,pro
         # print("packet_length",states[0][0][col_dict['packet_length']])
         # print("types(states)",type(states))
         new_queue_length = float(states[0][0][col_dict['length_in_bytes']])
-        print("new_action",new_action.item())
+        # print("new_action",new_action.item())
         if new_action == 0 or new_action == 2:
             new_queue_length = (float(states[0][0][col_dict['length_in_bytes']]) + float(states[0][0][col_dict['packet_length']]))
         cur_datapoint_idx = find_nearest_length(df_ats, new_queue_length)
-        print("datapoint",cur_datapoint_idx)
+        # print("datapoint",cur_datapoint_idx)
         if ep_index % llm_freq == 0:
             start_iloc = cur_datapoint_idx
             model.reset_dq()
@@ -324,7 +324,7 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,pro
         # Next start datapoint of episode will be the nearest datapoint,
         # we can find from the database
 
-        print(f'Step {ep_index} - test_loss.item() {test_loss.item()}')
+        # print(f'Step {ep_index} - test_loss.item() {test_loss.item()}')
         
         # Log step information
         step_logs = {
@@ -359,11 +359,11 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,pro
  # To Save Original Sequence
     for ep_index in range(max_ep_len):
         # df.to_csv("second_save.csv")
-        print("start_iloc",start_iloc)
+        # print("start_iloc",start_iloc)
         row = df.iloc[start_iloc]
-        print("row,",row)
+        # print("row,",row)
         
-        print("--" * 40)
+        # print("--" * 40)
         state = np.array(row[state_columns], dtype=np.float32)
         current_action = row['actions']
         reward=row['rewards']
@@ -373,7 +373,7 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,pro
         test_loss, states, actions, returns, timesteps, labels, actions_pred1, actions_pred = otest_step(args, model, loss_fn, batch,target_return)
 
 
-        print(f'Step {ep_index} - test_loss.item() {test_loss.item()}')
+        # print(f'Step {ep_index} - test_loss.item() {test_loss.item()}')
         
         # Log step information
         step_logs = {
