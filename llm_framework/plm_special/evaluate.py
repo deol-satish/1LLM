@@ -210,7 +210,7 @@ def otest_step(args, model, loss_fn, raw_batch, target_return):
 
 
 
-def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,process_reward_fn=None, seed=0):
+def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,llm_freq=100,process_reward_fn=None, seed=0):
     if process_reward_fn is None:
         process_reward_fn = lambda x: x
     
@@ -231,8 +231,8 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,pro
     # print("*-*-"*80)
     # df.to_csv("first_save.csv")
 
-    max_ep_len = 200
-    llm_freq = 100
+    max_ep_len = 3600
+    llm_freq = llm_freq
 
     row = df.iloc[0]
     test_start = time.time()
