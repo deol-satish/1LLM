@@ -9,3 +9,5 @@ ft_plms
 Log Viz
 results
 *.json
+/llm_framework/data/exp_pools
+/new_results_v2

@@ -165,13 +165,13 @@ def adapt(args, model, exp_dataset, exp_dataset_info, checkpoint_dir, best_model
     np.savetxt(train_losses_path, total_train_losses, fmt='%.6f', delimiter='\n')
 
 
-    # exp_pool_path = "./data/exp_pools/exp_pool_l4s_eval.pkl"
+    # exp_pool_path = "./data/exp_pools/udp_exp_pool_l4s_eval.pkl"
     # exp_pool = pickle.load(open(exp_pool_path, 'rb'))
     # evaluate_on_simulated_env(args, model, exp_pool , target_return, loss_fn, eval_process_reward_fn)
 
 
 def eval(args, model, exp_dataset_info, model_dir, result_dir, eval_process_reward_fn):
-    exp_pool_path = "./data/exp_pools/exp_pool_l4s_eval.pkl"
+    exp_pool_path = "./data/exp_pools/udp_exp_pool_l4s_eval.pkl"
     exp_pool = pickle.load(open(exp_pool_path, 'rb'))
     loss_fn = CrossEntropyLoss()
     print("EVAL model_dir:",model_dir)
@@ -183,7 +183,7 @@ def eval(args, model, exp_dataset_info, model_dir, result_dir, eval_process_rewa
     print('Load model from:', model_dir)
 
 def test(args, rl_policy, exp_dataset_info, model_dir, result_dir, eval_process_reward_fn):
-    exp_pool_path = "./data/exp_pools/exp_pool_l4s_train.pkl"
+    exp_pool_path = "./data/exp_pools/udp_exp_pool_l4s_train.pkl"
     exp_pool = pickle.load(open(exp_pool_path, 'rb'))
     exp_dataset = ExperienceDataset(exp_pool, gamma=args.gamma, scale=args.scale, max_length=args.w, sample_step=args.sample_step)
     exp_dataset_info = Munch(exp_dataset.exp_dataset_info)
@@ -226,13 +226,13 @@ def run(args):
     exp_pool_path = "Nothing Empty"
 
     if args.adapt:
-        exp_pool_path = "./data/exp_pools/exp_pool_l4s_train.pkl"
+        exp_pool_path = "./data/exp_pools/udp_exp_pool_l4s_train.pkl"
 
     if args.eval:
-        exp_pool_path = "./data/exp_pools/exp_pool_l4s_eval.pkl"
+        exp_pool_path = "./data/exp_pools/udp_exp_pool_l4s_eval.pkl"
 
     if args.test:
-        exp_pool_path = "./data/exp_pools/exp_pool_l4s_train.pkl"
+        exp_pool_path = "./data/exp_pools/udp_exp_pool_l4s_train.pkl"
 
 
     # 3. create training dataset, fetch info
