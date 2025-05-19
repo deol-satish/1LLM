@@ -16,7 +16,8 @@ plm_configurations = [
 
 # Modes for each experiment
 # modes = ['adapt', 'test', 'eval']
-modes = ['eval']
+# modes = ['eval']
+modes = ['adapt', 'test']
 
 # Generate all commands dynamically
 commands = [generate_command(plm_type, plm_size, mode) 
