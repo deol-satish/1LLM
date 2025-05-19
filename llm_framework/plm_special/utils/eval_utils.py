@@ -81,16 +81,16 @@ def find_nearest_length(df, cur_index,states, new_action, new_queue_length):
     nearest_idx = (df_filtered[column] - new_queue_length).abs().idxmin()
 
     logging.debug("Nearest index: %s", nearest_idx)
-    logging.debug()
+    logging.debug("")
     logging.debug("()()()()()"* 20)
     logging.debug("%s",(df_filtered[column] - new_queue_length).abs())
     logging.debug("df_filtered[column][nearest_idx]: %s",df_filtered[column][nearest_idx])
-    logging.debug("new_queue_length",new_queue_length)
+    logging.debug("new_queue_length %s",new_queue_length)
     logging.debug("df_filtered[column][nearest_idx] - new_queue_length: %s",df_filtered[column][nearest_idx] - new_queue_length)
     logging.debug("Nearest index: %s", nearest_idx)
     logging.debug("Current index: %s", cur_index)
     logging.debug("()()()()()"* 20)
-    logging.debug()
+    logging.debug("")
 
     if nearest_idx >= df.index.max():
         print()

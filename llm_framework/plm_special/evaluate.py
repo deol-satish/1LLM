@@ -70,8 +70,10 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,llm
 
     # Initialization
     llm_freq = llm_freq
+    print("llm_freq", llm_freq)
+    logging.debug("llm_freq: %s", llm_freq)
     current_date = datetime.today().strftime('%Y-%m-%d')
-    base_path = f'./results/{args.plm_type}/{current_date}'
+    base_path = f'./results_test/{args.plm_type}/{current_date}'
     os.makedirs(base_path, exist_ok=True)
 
     df = convert_exp_pool_to_dataframe(exp_pool)
@@ -95,8 +97,8 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,llm
         step_index = 0
         cur_index = 0
         # step_limit = len(df_subset) - 1
-        step_limit = df_subset.index.max() - 1
-        step_limit = 16000
+        step_limit = (df_subset.index.max() - 1) * 0.2
+        # step_limit = 3600
         logging.debug("Step limit: %s", step_limit)
         logging.debug(f"Processing index: {cur_index}, Traffic Type: {traffic_type}, Use Model Decision: {use_model_decision}")
 
@@ -120,28 +122,34 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,llm
             logging.debug("new_action.item(): %s",new_action.item())
             logging.debug("new_action: %s",new_action)
 
-
-            # Model-based or sequential policy
-            if new_action.item() == 1 or new_action.item() == 2:
-                logging.debug(f"action 1 or 2:,Current Ep Index: {step_index},Processing index: {cur_index}, Traffic Type: {traffic_type}, Use Model Decision: {use_model_decision} ")
-                
-            if use_model_decision:
+            if step_index % llm_freq == 0 and use_model_decision:            
+                # Use the model to decide the action    
+                # Model-based policy
+                if new_action.item() == 1 or new_action.item() == 2:
+                    logging.debug(f"action 1 or 2:,Current Ep Index: {step_index},Processing index: {cur_index}, Traffic Type: {traffic_type}, Use Model Decision: {use_model_decision} ")
+         
                 new_queue_length = float(states[0][0][col_dict['length_in_bytes']])
                 # CHeck whether the new action is 0 or 2 ( or ENQUEUE or MARKECN )
                 if new_action.item() == 0 or new_action.item() == 2 :
                     new_queue_length = (float(states[0][0][col_dict['length_in_bytes']]) + float(states[0][0][col_dict['packet_length']]))
                     new_iloc = find_nearest_length(df_subset, cur_index, states, new_action, new_queue_length)
                     if new_iloc is None or new_iloc >= len(df_subset):
+                        logging.debug("new_iloc is None or out of bounds, breaking loop")
                         break
                     cur_index = new_iloc
+                    cur_index += 1
                 else:
                     new_queue_length = float(states[0][0][col_dict['length_in_bytes']])
                     new_iloc = find_nearest_length(df_subset, cur_index, states, new_action, new_queue_length)
                     if new_iloc is None or new_iloc >= len(df_subset):
+                        logging.debug("new_iloc is None or out of bounds, breaking loop")
                         break
                     cur_index = new_iloc
                     cur_index += 1
+
+                model.reset_dq()
             else:
+                # Sequential policy
                 cur_index += 1
 
             logs['steps'].append(log_step(
