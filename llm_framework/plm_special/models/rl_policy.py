@@ -183,7 +183,7 @@ class OfflineRLPolicy(nn.Module):
         state_embeddings4 = self.embed_state4(state_features[3]) + time_embeddings
         state_embeddings5 = self.embed_state5(state_features[4]) + time_embeddings
         state_embeddings6 = self.embed_state6(state_features[5]) + time_embeddings
-        state_embeddings7 = self.embed_state6(state_features[6]) + time_embeddings
+        state_embeddings7 = self.embed_state7(state_features[6]) + time_embeddings
 
         state_embeddings = torch.cat([state_embeddings1, state_embeddings2, state_embeddings3, state_embeddings4,
                                       state_embeddings5, state_embeddings6,state_embeddings7], dim=1)
