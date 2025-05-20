@@ -95,7 +95,7 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,llm
     def run_policy(df_subset, traffic_type, use_model_decision=True):
         logs = defaultdict(list)
         step_index = 0
-        cur_index = 0
+        cur_index = 0 # Current Datapoint in our timeseries data
         # step_limit = len(df_subset) - 1
         step_limit = (df_subset.index.max() - 1) * 0.2
         # step_limit = 3600
