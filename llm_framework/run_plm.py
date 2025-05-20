@@ -177,7 +177,8 @@ def eval(args, model, exp_dataset_info, model_dir, result_dir, eval_process_rewa
     print("EVAL model_dir:",model_dir)
     model = load_model(args, model, model_dir)
     target_return = exp_dataset_info.max_return * args.target_return_scale
-    evaluate_on_simulated_env(args, model, exp_pool , target_return, loss_fn, eval_process_reward_fn)
+    evaluate_on_simulated_env(args, model, exp_pool , target_return, loss_fn, eval_process_reward_fn,100)
+    evaluate_on_simulated_env(args, model, exp_pool , target_return, loss_fn, eval_process_reward_fn,10)
     
     print('Load model from:', model_dir)
 
