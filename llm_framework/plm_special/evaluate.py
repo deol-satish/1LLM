@@ -77,6 +77,7 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,llm
     os.makedirs(base_path, exist_ok=True)
 
     df = convert_exp_pool_to_dataframe(exp_pool)
+    df_all = df.copy()
     # Filter and reset index for classic queue (queue_type == 0)
     df_classic = df[df['queue_type'] == 0].reset_index(drop=True)
     # Filter and reset index for L4S queue (queue_type == 1)
@@ -94,8 +95,8 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,llm
 
     def run_policy(df_subset, traffic_type, use_model_decision=True):
         logs = defaultdict(list)
-        step_index = 0
-        cur_index = 0 # Current Datapoint in our timeseries data
+        step_index = 0 # records the number of steps taken
+        cur_index = 0 # records which datapoint we are currently at
         # step_limit = len(df_subset) - 1
         step_limit = (df_subset.index.max() - 1) * 0.2
         # step_limit = 3600
@@ -164,11 +165,25 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,llm
 
 
 
-    
+    # Part 0: Consider both L4S and classic traffic with LLM Policy
+    all_traffic_llm_logs = run_policy(df_all, traffic_type='all_traffic', use_model_decision=True)
+    all_traffic_llm_filename = f'{args.plm_type}_{args.plm_size}_{llm_freq}_all_traffic_llm_eval_logs.json'
+    all_traffic_llm_file_path = os.path.join(base_path, all_traffic_llm_filename)
+    with open(all_traffic_llm_file_path, 'w') as f:
+        json.dump(all_traffic_llm_logs, f, indent=4)
+    logging.debug(f"Saved all_traffic_llm logs to {all_traffic_llm_file_path}")
+
+    # Part 0: Consider both L4S and classic traffic with LLM Policy
+    all_traffic_original_logs = run_policy(df_all, traffic_type='all_traffic', use_model_decision=False)
+    all_traffic_original_filename = f'{args.plm_type}_{args.plm_size}_{llm_freq}_all_traffic_original_eval_logs.json'
+    all_traffic_original_file_path = os.path.join(base_path, all_traffic_original_filename)
+    with open(all_traffic_original_file_path, 'w') as f:
+        json.dump(all_traffic_original_logs, f, indent=4)
+    logging.debug(f"Saved all_traffic_original logs to {all_traffic_original_file_path}")
 
     
 
-    # Part 1: Classic traffic with LLM policy
+    # Part 2: Classic traffic with LLM policy
     classic_llm_logs = run_policy(df_classic, traffic_type='classic_llm', use_model_decision=True)
     classic_llm_filename = f'{args.plm_type}_{args.plm_size}_{llm_freq}_classic_traffic_llm_eval_logs.json'
     classic_llm_file_path = os.path.join(base_path, classic_llm_filename)
@@ -177,7 +192,7 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,llm
     logging.debug(f"Saved classic_traffic_llm logs to {classic_llm_file_path}")
 
 
-    # Part 2: Classic traffic without LLM (original, sequential)
+    # Part 3: Classic traffic without LLM (original, sequential)
     classic_original_logs = run_policy(df_classic, traffic_type='classic_original', use_model_decision=False)
     classic_original_filename = f'{args.plm_type}_{args.plm_size}_{llm_freq}_classic_traffic_original_eval_logs.json'
     classic_original_file_path = os.path.join(base_path, classic_original_filename)
@@ -186,7 +201,7 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,llm
     logging.debug(f"Saved classic_traffic_original logs to {classic_original_file_path}")
 
 
-    # Part 3: L4S traffic with LLM policy
+    # Part 4: L4S traffic with LLM policy
     l4s_llm_logs = run_policy(df_l4s, traffic_type='l4s_llm', use_model_decision=True)
     l4s_llm_filename = f'{args.plm_type}_{args.plm_size}_{llm_freq}_l4s_traffic_llm_eval_logs.json'
     l4s_llm_file_path = os.path.join(base_path, l4s_llm_filename)
@@ -194,7 +209,7 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,llm
         json.dump(l4s_llm_logs, f, indent=4)
     logging.debug(f"Saved l4s_traffic_llm logs to {l4s_llm_file_path}")
 
-    # Part 4: L4S traffic without LLM (original, sequential)
+    # Part 5: L4S traffic without LLM (original, sequential)
     l4s_original_logs = run_policy(df_l4s, traffic_type='l4s_original', use_model_decision=False)
     l4s_original_filename = f'{args.plm_type}_{args.plm_size}_{llm_freq}_l4s_traffic_original_eval_logs.json'
     l4s_original_file_path = os.path.join(base_path, l4s_original_filename)
