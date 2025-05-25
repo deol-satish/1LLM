@@ -17,7 +17,7 @@ plm_configurations = [
 # Modes for each experiment
 # modes = ['adapt', 'test', 'eval']
 # modes = ['eval']
-modes = ['adapt', 'test']
+modes = ['adapt', 'test', 'eval']
 
 # Generate all commands dynamically
 commands = [generate_command(plm_type, plm_size, mode) 
@@ -33,3 +33,33 @@ for command in commands:
         print(f"Error occurred while running: {command}")
         print(f"Error details: {e}")
         break  # Stop execution if a command fails
+
+
+# # List of PLM types and sizes
+# plm_configurations = [
+#     ("llama3", "base"),
+#     # ("opt", "xs"),
+#     # ("t5", "base"),
+#     # ("gpt2", "small"),
+#     ("llama2", "base"),
+# ]
+
+# # Modes for each experiment
+# # modes = ['adapt', 'test', 'eval']
+# modes = ['eval']
+# # modes = ['adapt', 'test', 'eval']
+
+# # Generate all commands dynamically
+# commands = [generate_command(plm_type, plm_size, mode) 
+#             for plm_type, plm_size in plm_configurations 
+#             for mode in modes]
+
+# # Run each command in sequence
+# for command in commands:
+#     try:
+#         subprocess.run(command, shell=True, check=True)
+#         print(f"Successfully ran: {command}")
+#     except subprocess.CalledProcessError as e:
+#         print(f"Error occurred while running: {command}")
+#         print(f"Error details: {e}")
+#         break  # Stop execution if a command fails

@@ -73,7 +73,7 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,llm
     print("llm_freq", llm_freq)
     logging.debug("llm_freq: %s", llm_freq)
     current_date = datetime.today().strftime('%Y-%m-%d')
-    base_path = f'./results_test/{args.plm_type}/{current_date}'
+    base_path = f'./results_eval/{args.plm_type}/{current_date}'
     os.makedirs(base_path, exist_ok=True)
 
     df = convert_exp_pool_to_dataframe(exp_pool)
@@ -99,6 +99,7 @@ def evaluate_on_simulated_env(args, model, exp_pool, target_return, loss_fn ,llm
         cur_index = 0 # records which datapoint we are currently at
         # step_limit = len(df_subset) - 1
         step_limit = (df_subset.index.max() - 1) * 0.2
+        step_limit = 20
         # step_limit = 3600
         logging.debug("Step limit: %s", step_limit)
         logging.debug(f"Processing index: {cur_index}, Traffic Type: {traffic_type}, Use Model Decision: {use_model_decision}")
