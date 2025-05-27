@@ -11,3 +11,5 @@ results
 *.json
 /llm_framework/data/exp_pools
 /new_results_v2
+*.log
+*.log
