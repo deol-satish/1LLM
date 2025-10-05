@@ -12,6 +12,7 @@ plm_configurations = [
     ("opt", "xs"),
     ("t5", "base"),
     ("gpt2", "small"),
+    ("llama4", "base"),
 ]
 
 # Modes for each experiment
@@ -19,14 +20,9 @@ modes = ['adapt','test','eval']
 
 
 
-# List of PLM types and sizes
-plm_configurations = [
-    ("llama3", "base"),
-    ("llama2", "base"),
-]
 
 # Modes for each experiment
-modes = ['eval']
+modes = ['adapt','test']
 
 # Generate all commands dynamically
 commands = [generate_command(plm_type, plm_size, mode) 
