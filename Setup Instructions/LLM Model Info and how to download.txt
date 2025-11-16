@@ -15,6 +15,20 @@ huggingface-cli deepseek-ai/DeepSeek-R1-Distill-Llama-8B --local-dir ./downloade
 
 ###################################################################################################
 
+huggingface-cli download google/gemma-3-270m --local-dir ../downloaded_plms/gemma3-270m/base
+
+huggingface-cli download meta-llama/Llama-4-Maverick-17B-128E-Original --local-dir ../downloaded_plms/Llama-4-Maverick-17B-128E-Original/base
+
+huggingface-cli download Qwen/Qwen3-0.6B--local-dir ../downloaded_plms/Qwen3-0.6B/base
+
+
+
+
+
+
+
+
+
 huggingface Links
 
 https://huggingface.co/meta-llama/Llama-2-7b
