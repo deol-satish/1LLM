@@ -13,10 +13,21 @@ plm_configurations = [
     ("t5", "base"),
     ("gpt2", "small"),
     ("llama4", "base"),
+    ("gemma3", "base"),
+    ("qwen3", "base"),
 ]
 
-# Modes for each experiment
-modes = ['adapt','test','eval']
+
+plm_configurations = [
+
+    # ("gemma3", "base"),
+    # ("qwen3", "base"),
+    ("llama4", "base"),
+]
+
+
+# # Modes for each experiment
+# modes = ['adapt','test','eval']
 
 
 

@@ -34,9 +34,25 @@ from transformers import BertConfig, BertTokenizer, BertLMHeadModel,\
 from transformers.models.gpt2.modeling_gpt2 import GPT2Model
 from transformers.models.t5.modeling_t5 import T5Model
 from transformers.models.llama.modeling_llama import LlamaModel
-from transformers.models.llama.modeling_llama4 import Llama4Model
+from transformers import LlamaTokenizer, LlamaForCausalLM
+
+
+
 from transformers.models.opt.modeling_opt import OPTModel
 from transformers.models.mistral.modeling_mistral import MistralModel
+from transformers import (
+    GemmaConfig,
+    GemmaTokenizer,
+    GemmaForCausalLM,
+    GemmaModel,
+)
+
+from transformers import (
+    Qwen2Config,
+    AutoTokenizer,
+    Qwen2ForCausalLM,
+    Qwen2Model,
+)
 
 from plm_special.models.llm_models.t5 import T5Model
                         
@@ -106,9 +122,20 @@ _MODEL_CLASSES = {
         "model": LlamaModel,
     }),
     "llama4": ModelClass(**{
-        "config": LlamaConfig,
-        "tokenizer": PreTrainedTokenizerFast,
-        "model": Llama4Model,
+        "config": LlamaConfig,          # HF uses the same config class
+        "tokenizer": LlamaTokenizer,    # correct tokenizer for all LLaMA variants
+        "model": LlamaModel,           # correct model implementation
+    }),
+    "gemma3": ModelClass(**{
+        "config": GemmaConfig,
+        "tokenizer": GemmaTokenizer,
+        "model": GemmaModel,   # Use GemmaModel to support inputs_embeds
+    }),
+
+    "qwen3": ModelClass(**{
+        "config": Qwen2Config,       # Qwen3 uses the updated Qwen2 config class
+        "tokenizer": AutoTokenizer,  # Qwen tokenizers load from tokenizer.model
+        "model": Qwen2Model,   # main HF model class
     }),
     "mistral": ModelClass(**{
         "config": MistralConfig,

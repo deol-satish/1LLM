@@ -135,7 +135,25 @@ class OfflineRLPolicy(nn.Module):
             attention_mask=attention_mask,
             output_hidden_states=True,
         )
-        logits = transformer_outputs['last_hidden_state']
+        # Handle different model output formats
+        if isinstance(transformer_outputs, dict):
+            if 'last_hidden_state' in transformer_outputs:
+                logits = transformer_outputs['last_hidden_state']
+            elif 'hidden_states' in transformer_outputs and len(transformer_outputs['hidden_states']) > 0:
+                logits = transformer_outputs['hidden_states'][-1]
+            else:
+                # Try to get the first tensor output
+                logits = next(iter(transformer_outputs.values()))
+        else:
+            # If output is a tuple/object with attributes
+            if hasattr(transformer_outputs, 'last_hidden_state'):
+                logits = transformer_outputs.last_hidden_state
+            elif hasattr(transformer_outputs, 'hidden_states') and len(transformer_outputs.hidden_states) > 0:
+                logits = transformer_outputs.hidden_states[-1]
+            else:
+                # Default to first element if it's a tuple
+                logits = transformer_outputs[0]
+        
         if self.residual:
             logits = logits + stacked_inputs_ln  # residual add
 

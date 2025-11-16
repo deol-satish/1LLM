@@ -7,13 +7,20 @@ TARGET_MODULES = {
     'llama2': ["q_proj", "v_proj"],
     'llama3': ["q_proj", "v_proj"],
     'llama4': ["q_proj", "v_proj"],
+
     'deepseek': ["q_proj", "v_proj"],
     'llava': ["q_proj", "v_proj"],
     'mistral': ["q_proj", "v_proj"],
     'opt': ["q_proj", "v_proj"],
-    'gpt2': ["c_attn", "c_proj"],  # Corrected for GPT-2
-    't5': ["q", "v"]
+
+    'gpt2': ["c_attn", "c_proj"],
+    't5': ["q", "v"],
+
+    # NEW MODELS
+    'qwen3': ["q_proj", "k_proj", "v_proj", "o_proj"],  # <-- added
+    'gemma3': ["q_proj", "k_proj", "v_proj", "o_proj"],  # <-- added
 }
+
 
 
 def print_trainable_parameters(model):
