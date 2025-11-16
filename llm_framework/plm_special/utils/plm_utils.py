@@ -118,12 +118,12 @@ _MODEL_CLASSES = {
     }),
     "llama3": ModelClass(**{
         "config": LlamaConfig,
-        "tokenizer": PreTrainedTokenizerFast,
+        "tokenizer": AutoTokenizer,
         "model": LlamaModel,
     }),
     "llama4": ModelClass(**{
         "config": LlamaConfig,          # HF uses the same config class
-        "tokenizer": LlamaTokenizer,    # correct tokenizer for all LLaMA variants
+        "tokenizer": AutoTokenizer,     # use AutoTokenizer for robustness
         "model": LlamaModel,           # correct model implementation
     }),
     "gemma3": ModelClass(**{
@@ -230,8 +230,14 @@ def load_plm(model_name, model_path, specials_to_add = None, **kwargs):
         print("device_map flase else")
         model = model_class.model.from_pretrained(model_path, config=model_config)
     
-    tokenizer = model_class.tokenizer.from_pretrained(model_path) 
-    print("If tokenizer is loaded: ",tokenizer.encode("hello world"),"\n")
+    # Load tokenizer - use AutoTokenizer if model_class.tokenizer is AutoTokenizer
+    if model_class.tokenizer is AutoTokenizer:
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+    else:
+        tokenizer = model_class.tokenizer.from_pretrained(model_path)
+    
+    if hasattr(tokenizer, 'encode'):
+        print("If tokenizer is loaded: ",tokenizer.encode("hello world"),"\n")
 
 
 

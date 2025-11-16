@@ -21,7 +21,7 @@ plm_configurations = [
 plm_configurations = [
 
     # ("gemma3", "base"),
-    # ("qwen3", "base"),
+    ("qwen3", "base"),
     ("llama4", "base"),
 ]
 

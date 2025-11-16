@@ -48,7 +48,7 @@ class Config:
             'base': 3072,
         },
         'llama4': {
-            'base': 5120,
+            'base': 4096,
         },
         'deepseek': {
             'base': 4096,
